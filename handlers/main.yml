@@ -1,0 +1,14 @@
+---
+- name: Restart container
+  command: "docker restart {{ item }}"
+  with_items:
+    - "{{ adguard_name }}"
+
+- name: Upgrade container
+  command: "docker stop {{ item }} && docker rm {{ item }}"
+  register: results
+  with_items:
+    - "{{ adguard_name }}"
+  failed_when: >-
+    results is failed and
+    "No such container" not in results.stderr | default(false)

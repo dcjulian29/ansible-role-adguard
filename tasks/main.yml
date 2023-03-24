@@ -1,0 +1,102 @@
+---
+- name: Ensure directories for Adguard exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: docker
+    mode: 0644
+  with_items:
+    - "{{ adguard_data_dir }}/{{ adguard_name }}"
+    - "{{ adguard_data_dir }}/{{ adguard_name }}/work"
+    - "{{ adguard_data_dir }}/{{ adguard_name }}/conf"
+
+- name: Pull Adguard docker image
+  community.docker.docker_image:
+    name: "{{ adguard_image }}"
+    source: pull
+    tag: "{{ adguard_version }}"
+  notify: Upgrade container
+
+- name: Ensure all handlers run before continuing
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Adguard is configured
+  ansible.builtin.template:
+    src: AdGuardHome.yaml.j2
+    dest: "{{ adguard_data_dir }}/{{ adguard_name }}/conf/AdGuardHome.yaml"
+    owner: root
+    group: docker
+    mode: 0644
+  tags:
+    - configure
+
+- name: Stop conflicting services that occupy needed DNS ports if needed
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  register: results
+  loop:
+    - systemd-resolved
+    - dnsmasq
+  failed_when: >-
+    results is failed and
+    "Could not find the requested service" not in results.msg | default('')
+  when:
+    - adguard_dns
+    - adguard_host_resolve_disable
+
+- name: Determine if HTTP port is not needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: []
+  when:
+    - adguard_tls or adguard_https
+    - adguard_letsencrypt | default(false)
+
+- name: Determine if DHCP ports are needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_dhcp }}"
+  when: adguard_dhcp
+
+- name: Determine if DNS ports are needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_dns }}"
+  when: adguard_dns
+
+- name: Determine if DNScrypt ports are needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_dnscrypt }}"
+  when: adguard_dnscrypt
+
+- name: Determine if HTTPS/DNS-HTTPS port is needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_https }}"
+  when: adguard_https
+
+- name: Determine if DNS-QUIC ports are needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_quic }}"
+  when: adguard_quic
+
+- name: Determine if DNS-TLS ports are needed for container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_tls }}"
+  when: adguard_tls
+
+- name: Ensure Adguard container is created
+  community.docker.docker_container:
+    container_default_behavior: no_defaults
+    detach: true
+    env:
+      TZ: "{{ ansible_date_time.tz }}"
+    image: "{{ adguard_image }}:{{ adguard_version }}"
+    interactive: false
+    name: "{{ adguard_name }}"
+    network_mode: "{{ 'host' if adguard_dhcp else 'bridge' }}"
+    ports: "{{ '[]' if adguard_dhcp else adguard_ports }}"
+    pull: false
+    restart_policy: always
+    state: started
+    volumes: "{{ adguard_volumes_le if (adguard_letsencrypt | default(false)) else adguard_volumes }}"
+  notify: Restart container

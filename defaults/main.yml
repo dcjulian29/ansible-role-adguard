@@ -1,0 +1,119 @@
+---
+adguard_client_resolve: false
+adguard_clients: []
+#  - name: testhost
+#    tags:
+#      - device_laptop
+#    ids:
+#      - 192.168.129.45
+#    blocked_services: []
+#    upstreams: []
+#    use_global_settings: false
+#    filtering_enabled: true
+#    parental_enabled: false
+#    safesearch_enabled: false
+#    safebrowsing_enabled: false
+#    use_global_blocked_services: true
+adguard_data_dir: /opt
+adguard_dhcp: false
+adguard_dhcp4:
+  gateway_ip: ""
+  subnet_mask: ""
+  range_start: ""
+  range_end: ""
+  lease_duration: 86400
+  icmp_timeout_msec: 1000
+  options: []
+adguard_dhcp6:
+  range_start: ""
+  lease_duration: 86400
+  ra_slaac_only: false
+  ra_allow_slaac: false
+adguard_dhcp_interface: ""
+adguard_dns: true
+adguard_dns_bootstrap:
+  - 8.8.8.8
+  - 9.9.9.9
+adguard_dns_rewrites: []
+adguard_dns_upstream:
+  - https://dns10.quad9.net/dns-query
+adguard_dnscrypt: false
+adguard_enable_edns: false
+adguard_enable_dnssec: false
+adguard_enable_resolve_v6: true
+adguard_filter: true
+adguard_filter_parental: false
+adguard_filter_safesearch: false
+adguard_filter_safebrowsing: false
+adguard_filter_update: 24
+adguard_filters:
+  - enabled: true
+    url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+    name: AdGuard DNS filter
+    id: 1
+  - enabled: false
+    url: https://adaway.org/hosts.txt
+    name: AdAway Default Blocklist
+    id: 2
+  - enabled: true
+    url: https://abp.oisd.nl/
+    name: OISD
+    id: 3
+adguard_host_resolve_disable: true
+adguard_https: false
+adguard_image: adguard/adguardhome
+adguard_letsencrypt: false
+adguard_name: "adguard_{{ ansible_hostname }}"
+adguard_password: Change2Me!
+adguard_ports:
+  - "80:80/tcp"
+adguard_ports_dhcp:
+  - "67:67/udp"
+  - "68:68/tcp"
+  - "68:68/udp"
+adguard_ports_dns:
+  - "53:53/tcp"
+  - "53:53/udp"
+adguard_ports_dnscrypt:
+  - "5443:5443/tcp"
+  - "5443:5443/udp"
+adguard_ports_https:
+  - "443:443/tcp"
+  - "443:443/udp"
+adguard_ports_quic:
+  - "784:784/udp"
+  - "853:853/udp"
+  - "8853:8853/udp"
+adguard_ports_tls:
+  - "853:853/tcp"
+adguard_volumes:
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
+adguard_volumes_le:
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
+  - "/etc/letsencrypt:/etc/letsencrypt:ro"
+adguard_ptr_enabled: false
+adguard_ptr_upstreams: []
+adguard_querylog_enabled: true
+adguard_querylog_interval: "2160h"
+adguard_querylog_anonymize: false
+adguard_quic: false
+adguard_rate: 20
+adguard_salt: "{{ ansible_machine_id[0:21] + '.' }}"
+adguard_statistics_interval: 1
+adguard_tls: false
+adguard_tls_certificate: ""
+adguard_tls_certificate_path: ""
+adguard_tls_key: ""
+adguard_tls_key_path: ""
+adguard_tls_sni_check: false
+adguard_url: "{{ ansible_fqdn }}"
+adguard_user: admin
+adguard_verbose: false
+adguard_version: v0.107.26
+adguard_whitelist:
+  - enabled: true
+    url: https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+    name: anudeepND
+    id: 4
