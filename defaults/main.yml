@@ -1,5 +1,7 @@
 ---
-adguard_client_resolve: false
+adguard_blocking_mode: default
+adquard_blocked_response_ttl: 10
+adguard_client_resolve: true
 adguard_clients: []
 #  - name: testhost
 #    tags:
@@ -96,7 +98,7 @@ adguard_volumes_le:
 adguard_ptr_enabled: false
 adguard_ptr_upstreams: []
 adguard_querylog_enabled: true
-adguard_querylog_interval: "2160h"
+adguard_querylog_interval: 2160h
 adguard_querylog_anonymize: false
 adguard_quic: false
 adguard_rate: 20
