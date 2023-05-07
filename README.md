@@ -1,6 +1,6 @@
 # Ansible Role: adguard
 
-[![CI](https://github.com/dcjulian29/ansible-role-adguard/actions/workflows/ci.yml/badge.svg)](https://github.com/dcjulian29/ansible-role-adguard/actions/workflows/ci.yml) [![GitHub Issues](https://img.shields.io/github/issues-raw/dcjulian29/ansible-role-adguard.svg)](https://github.com/dcjulian29/ansible-role-adguard/issues)
+[![Lint](https://github.com/dcjulian29/ansible-role-adguard/actions/workflows/lint.yml/badge.svg)](https://github.com/dcjulian29/ansible-role-adguard/actions/workflows/lint.yml) [![GitHub Issues](https://img.shields.io/github/issues-raw/dcjulian29/ansible-role-adguard.svg)](https://github.com/dcjulian29/ansible-role-adguard/issues)
 
 This an Ansible role to install and configure Adguard DNS server.
 
@@ -28,12 +28,5 @@ ansible-galaxy install -r requirements.yml
 
 ## Dependencies
 
-None
-
-## Role Variables
-
-TODO
-
-## Example Playbook
-
-The examples directory include one or more example playbooks.
+- Ansible Role: `dcjulian29.docker`
+- Ansible Role: `geerlingguy.pip`
