@@ -16,7 +16,7 @@
     name: "{{ adguard_image }}"
     source: pull
     tag: "{{ adguard_version }}"
-  notify: Upgrade container
+  notify: Remove Adguard
 
 - name: Ensure all handlers run before continuing
   ansible.builtin.meta: flush_handlers
@@ -30,6 +30,7 @@
     mode: 0644
   tags:
     - configure
+  notify: Restart Adguard
 
 - name: Stop conflicting services that occupy needed DNS ports if needed
   ansible.builtin.service:
@@ -99,4 +100,4 @@
     restart_policy: always
     state: started
     volumes: "{{ adguard_volumes_le if (adguard_letsencrypt | default(false)) else adguard_volumes }}"
-  notify: Restart container
+  notify: Restart Adguard

@@ -52,10 +52,10 @@ dns:
   trusted_proxies:
     - 127.0.0.0/8
     - ::1/128
-  cache_size: 4194304
-  cache_ttl_min: 0
-  cache_ttl_max: 0
-  cache_optimistic: false
+  cache_size: {{ adguard_cache_size }}
+  cache_ttl_min: {{ adguard_cache_ttl_min }}
+  cache_ttl_max: {{ adguard_cache_ttl_max }}
+  cache_optimistic: {{ adguard_cache_optimistic | default(false) | lower | string }}
   bogus_nxdomain: []
   aaaa_disabled: {{ (not adguard_enable_resolve_v6) | default(false) | lower | string }}
   enable_dnssec: {{ adguard_enable_dnssec | default(false) | lower | string }}

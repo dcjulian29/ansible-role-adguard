@@ -1,10 +1,10 @@
 ---
-- name: Restart container
+- name: Restart Adguard
   command: "docker restart {{ item }}"
   with_items:
     - "{{ adguard_name }}"
 
-- name: Upgrade container
+- name: Remove Adguard
   command: "docker stop {{ item }} && docker rm {{ item }}"
   register: results
   with_items:
