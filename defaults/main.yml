@@ -1,6 +1,7 @@
 ---
 adguard_blocking_mode: default
 adquard_blocked_response_ttl: 10
+adguard_bootstrap_prefer_ipv6: false
 adguard_cache_size: 4194304
 adguard_cache_ttl_min: 0
 adguard_cache_ttl_max: 0
@@ -8,33 +9,33 @@ adguard_cache_optimistic: false
 adguard_client_resolve: true
 adguard_clients: []
 #  - name: testhost
-#    tags:
-#      - device_laptop
+#    blocked_services: []
+#    filtering_enabled: true
 #    ids:
 #      - 192.168.129.45
-#    blocked_services: []
-#    upstreams: []
-#    use_global_settings: false
-#    filtering_enabled: true
 #    parental_enabled: false
-#    safesearch_enabled: false
 #    safebrowsing_enabled: false
+#    safesearch_enabled: false
+#    tags:
+#      - device_laptop
+#    upstreams: []
 #    use_global_blocked_services: true
+#    use_global_settings: false
 adguard_data_dir: /opt
 adguard_dhcp: false
 adguard_dhcp4:
   gateway_ip: ""
-  subnet_mask: ""
-  range_start: ""
-  range_end: ""
-  lease_duration: 86400
   icmp_timeout_msec: 1000
+  lease_duration: 86400
   options: []
-adguard_dhcp6:
+  range_end: ""
   range_start: ""
+  subnet_mask: ""
+adguard_dhcp6:
   lease_duration: 86400
   ra_slaac_only: false
   ra_allow_slaac: false
+  range_start: ""
 adguard_dhcp_interface: ""
 adguard_dns: true
 adguard_dns_bootstrap:
@@ -44,32 +45,30 @@ adguard_dns_rewrites: []
 adguard_dns_upstream:
   - https://dns10.quad9.net/dns-query
 adguard_dnscrypt: false
-adguard_enable_edns: false
 adguard_enable_dnssec: false
+adguard_enable_edns: false
 adguard_enable_resolve_v6: true
 adguard_filter: true
-adguard_filter_parental: false
-adguard_filter_safesearch: false
-adguard_filter_safebrowsing: false
 adguard_filter_update: 24
 adguard_filters:
   - enabled: true
-    url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
-    name: AdGuard DNS filter
     id: 1
+    name: AdGuard DNS filter
+    url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
   - enabled: false
-    url: https://adaway.org/hosts.txt
-    name: AdAway Default Blocklist
     id: 2
+    name: AdAway Default Blocklist
+    url: https://adaway.org/hosts.txt
   - enabled: true
-    url: https://abp.oisd.nl/
-    name: OISD
     id: 3
+    name: OISD
+    url: https://abp.oisd.nl/
 adguard_host_resolve_disable: true
 adguard_https: false
 adguard_image: adguard/adguardhome
 adguard_letsencrypt: false
 adguard_name: "adguard_{{ ansible_hostname }}"
+adguard_parental: false
 adguard_password: Change2Me!
 adguard_ports:
   - "80:80/tcp"
@@ -92,20 +91,21 @@ adguard_ports_quic:
   - "8853:8853/udp"
 adguard_ports_tls:
   - "853:853/tcp"
-adguard_volumes:
-  - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
-  - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
-adguard_volumes_le:
-  - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
-  - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
-  - "/etc/letsencrypt:/etc/letsencrypt:ro"
 adguard_ptr_enabled: false
 adguard_ptr_upstreams: []
+adguard_querylog_anonymize: false
 adguard_querylog_enabled: true
 adguard_querylog_interval: 2160h
-adguard_querylog_anonymize: false
 adguard_quic: false
 adguard_rate: 20
+adguard_safe_browsing: false
+adguard_safe_search: false
+adguard_safe_search_bing: true
+adguard_safe_search_duckduckgo: true
+adguard_safe_search_google: true
+adguard_safe_search_pixabay: true
+adguard_safe_search_yandex: true
+adguard_safe_search_youtube: true
 adguard_salt: "{{ ansible_machine_id[0:21] + '.' }}"
 adguard_statistics_interval: 1
 adguard_tls: false
@@ -118,8 +118,15 @@ adguard_url: "{{ ansible_fqdn }}"
 adguard_user: admin
 adguard_verbose: false
 adguard_version: v0.107.32
+adguard_volumes:
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
+adguard_volumes_le:
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
+  - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
+  - "/etc/letsencrypt:/etc/letsencrypt:ro"
 adguard_whitelist:
   - enabled: true
-    url: https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-    name: anudeepND
     id: 4
+    name: anudeepND
+    url: https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt

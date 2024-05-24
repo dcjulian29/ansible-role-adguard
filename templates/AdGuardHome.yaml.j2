@@ -1,30 +1,119 @@
+auth_attempts: 5
 bind_host: 0.0.0.0
 bind_port: 80
-users:
-  - name: {{ adguard_user }}
-    password: {{ adguard_password | password_hash('bcrypt', adguard_salt) }}
-auth_attempts: 5
 block_auth_min: 15
-http_proxy: ""
-language: ""
-theme: auto
+clients:
+  persistent: []
+  runtime_sources:
+    arp: {{ adguard_client_resolve | default(true) | lower | string }}
+    dhcp: {{ adguard_client_resolve | default(true) | lower | string }}
+    hosts: {{ adguard_client_resolve | default(true) | lower | string }}
+    rdns: {{ adguard_client_resolve | default(true) | lower | string }}
+    whois: {{ adguard_client_resolve | default(true) | lower | string }}
 debug_pprof: false
-web_session_ttl: 720
+dhcp:
+  dhcpv4:
+    gateway_ip: "{{ adguard_dhcp4.gateway_ip }}"
+    icmp_timeout_msec: {{ adguard_dhcp4.icmp_timeout_msec | default(1000) }}
+    lease_duration: {{ adguard_dhcp4.lease_duration | default(86400) }}
+    options: {{ adguard_dhcp4.options | from_yaml }}
+    range_end: "{{ adguard_dhcp4.range_end }}"
+    range_start: "{{ adguard_dhcp4.range_start }}"
+    subnet_mask: "{{ adguard_dhcp4.subnet_mask }}"
+  dhcpv6:
+    lease_duration: {{ adguard_dhcp6.lease_duration | default(86400) }}
+    ra_allow_slaac: {{ adguard_dhcp4.ra_allow_slaac | default(false) | lower | string }}
+    ra_slaac_only: {{ adguard_dhcp4.ra_slaac_only | default(false) | lower | string }}
+    range_start: "{{ adguard_dhcp6.range_start }}"
+  enabled: {{ adguard_dhcp | default(false) | lower | string }}
+  interface_name: "{{ adguard_dhcp_interface }}"
+  local_domain_name: lan
 dns:
+  aaaa_disabled: {{ (not adguard_enable_resolve_v6) | default(false) | lower | string }}
+  all_servers: false
+  allowed_clients: []
+  anonymize_client_ip: {{ adguard_querylog_anoymize | default(false) | lower | string }}
   bind_hosts:
     - 0.0.0.0
-  port: 53
-  anonymize_client_ip: {{ adguard_querylog_anoymize | default(false) | lower | string }}
-  protection_enabled: true
-  blocking_mode: {{ adguard_blocking_mode }}
+  blocked_hosts:
+    - version.bind
+    - id.server
+    - hostname.bind
+  blocked_response_ttl: {{ adquard_blocked_response_ttl }}
+  blocked_services: []
   blocking_ipv4: ""
   blocking_ipv6: ""
-  blocked_response_ttl: {{ adquard_blocked_response_ttl }}
+  blocking_mode: {{ adguard_blocking_mode }}
+  bogus_nxdomain: []
+{% if adguard_dns_bootstrap | length > 0 %}
+  bootstrap_dns:
+{% for dnshost in adguard_dns_bootstrap %}
+    - {{ dnshost }}
+{% endfor %}{% else %}
+  bootstrap_dns: []
+{% endif %}
+  bootstrap_prefer_ipv6: {{ adguard_bootstrap_prefer_ipv6 | default(false) | lower | string }}
+  cache_optimistic: {{ adguard_cache_optimistic | default(false) | lower | string }}
+  cache_size: {{ adguard_cache_size }}
+  cache_time: 30
+  cache_ttl_max: {{ adguard_cache_ttl_max }}
+  cache_ttl_min: {{ adguard_cache_ttl_min }}
+  disallowed_clients: []
+  dns64_prefixes: []
+  edns_client_subnet:
+    custom_ip: ""
+    enabled: {{ adguard_enable_edns | default(false) | lower | string }}
+    use_custom: false
+  enable_dnssec: {{ adguard_enable_dnssec | default(false) | lower | string }}
+  fastest_addr: false
+  fastest_timeout: 1s
+  filtering_enabled: {{ adguard_filter | default(true) | lower | string }}
+  filters_update_interval: {{ adguard_filter_update | default(24) }}
+  handle_ddr: true
+  ipset: []
+  ipset_file: ""
+{% if adguard_ptr_upstreams | length > 0 %}
+  local_ptr_upstreams:
+{% for upstream in adguard_ptr_upstreams %}
+    - {{ upstream }}
+{% endfor %}{% else %}
+  local_ptr_upstreams: []
+{% endif %}
+  max_goroutines: 300
   parental_block_host: family-block.dns.adguard.com
-  safebrowsing_block_host: standard-block.dns.adguard.com
+  parental_cache_size: 1048576
+  parental_enabled: {{ adguard_parental | default(false) | lower | string }}
+  port: 53
+  private_networks: []
+  protection_disabled_until: null
+  protection_enabled: true
   ratelimit: {{ adguard_rate }}
   ratelimit_whitelist: []
   refuse_any: true
+{% if adguard_dns_rewrites | length > 0 %}
+  rewrites:
+{% for rewrite in adguard_dns_rewrites | dictsort(false, 'domain') %}
+    - domain: {{ rewrite.domain }}
+      answer: {{ rewrite.answer }}
+{% endfor %}{% else %}
+  rewrites: []
+{% endif %}
+  safe_search:
+    bing: {{ adguard_safe_search_bing | default(true) | lower | string }}
+    duckduckgo: {{ adguard_safe_search_duckduckgo | default(true) | lower | string }}
+    enabled: {{ adguard_safe_search | default(false) | lower | string }}
+    google: {{ adguard_safe_search_google | default(true) | lower | string }}
+    pixabay: {{ adguard_safe_search_pixabay | default(true) | lower | string }}
+    yandex: {{ adguard_safe_search_yandex | default(true) | lower | string }}
+    youtube: {{ adguard_safe_search_youtube | default(true) | lower | string }}
+  safebrowsing_block_host: standard-block.dns.adguard.com
+  safebrowsing_cache_size: 1048576
+  safebrowsing_enabled: {{ adguard_safe_browsing | default(false) | lower | string }}
+  safesearch_cache_size: 1048576
+  serve_http3: false
+  trusted_proxies:
+    - 127.0.0.0/8
+    - ::1/128
 {% if adguard_dns_upstream | length > 0 %}
   upstream_dns:
 {% for upstream in adguard_dns_upstream %}
@@ -33,105 +122,10 @@ dns:
   upstream_dns: []
 {% endif %}
   upstream_dns_file: ""
-{% if adguard_dns_bootstrap | length > 0 %}
-  bootstrap_dns:
-{% for dnshost in adguard_dns_bootstrap %}
-    - {{ dnshost }}
-{% endfor %}{% else %}
-  bootstrap_dns: []
-{% endif %}
-  all_servers: false
-  fastest_addr: false
-  fastest_timeout: 1s
-  allowed_clients: []
-  disallowed_clients: []
-  blocked_hosts:
-    - version.bind
-    - id.server
-    - hostname.bind
-  trusted_proxies:
-    - 127.0.0.0/8
-    - ::1/128
-  cache_size: {{ adguard_cache_size }}
-  cache_ttl_min: {{ adguard_cache_ttl_min }}
-  cache_ttl_max: {{ adguard_cache_ttl_max }}
-  cache_optimistic: {{ adguard_cache_optimistic | default(false) | lower | string }}
-  bogus_nxdomain: []
-  aaaa_disabled: {{ (not adguard_enable_resolve_v6) | default(false) | lower | string }}
-  enable_dnssec: {{ adguard_enable_dnssec | default(false) | lower | string }}
-  edns_client_subnet:
-    custom_ip: ""
-    enabled: {{ adguard_enable_edns | default(false) | lower | string }}
-    use_custom: false
-  max_goroutines: 300
-  handle_ddr: true
-  ipset: []
-  ipset_file: ""
-  filtering_enabled: {{ adguard_filter | default(true) | lower | string }}
-  filters_update_interval: {{ adguard_filter_update | default(24) }}
-  parental_enabled: {{ adguard_filter_parental | default(false) | lower | string }}
-  safesearch_enabled: {{ adguard_filter_safesearch | default(false) | lower | string }}
-  safebrowsing_enabled: {{ adguard_filter_safebrowsing | default(false) | lower | string }}
-  safebrowsing_cache_size: 1048576
-  safesearch_cache_size: 1048576
-  parental_cache_size: 1048576
-  cache_time: 30
-{% if adguard_dns_rewrites | length > 0 %}
-  rewrites:
-{% for rewrite in adguard_dns_rewrites %}
-    - domain: {{ rewrite.domain }}
-      answer: {{ rewrite.answer }}
-{% endfor %}{% else %}
-  rewrites: []
-{% endif %}
-  blocked_services: []
   upstream_timeout: 10s
-  private_networks: []
-  use_private_ptr_resolvers: {{ adguard_ptr_enabled | default(false) | lower | string }}
-{% if adguard_ptr_upstreams | length > 0 %}
-  local_ptr_upstreams:
-{% for upstream in adguard_ptr_upstreams %}
-    - {{ upstream }}
-{% endfor %}{% else %}
-  local_ptr_upstreams: []
-{% endif %}
   use_dns64: false
-  dns64_prefixes: []
-  serve_http3: false
   use_http3_upstreams: false
-tls:
-  enabled: {{ (adguard_tls or adguard_https) | default(false) | lower | string }}
-  server_name: {{ adguard_url }}
-  force_https: {{ adguard_https | default(false) | lower | string }}
-  port_https: 443
-  port_dns_over_tls: 853
-  port_dns_over_quic: 784
-  port_dnscrypt: {{ 5443 if adguard_dnscrypt else 0 }}
-  dnscrypt_config_file: ""
-  allow_unencrypted_doh: false
-  certificate_chain: {{ (adguard_tls_certificate | from_yaml) if (adguard_tls_certificate | length > 0) else '""' }}
-  private_key: {{ (adguard_tls_key | from_yaml) if (adguard_tls_key | length > 0) else '""' }}
-{% if adguard_tls_certificate_path | length > 0 %}
-  certificate_path: {{ '""' if (adguard_tls_certificate | length > 0) else adguard_tls_certificate_path }}
-{% else %}
-  certificate_path: ""
-{% endif %}
-{% if adguard_tls_key_path | length > 0 %}
-  private_key_path: {{ '""' if (adguard_tls_key | length > 0) else adguard_tls_key_path }}
-{% else %}
-  private_key_path: ""
-{% endif %}
-  strict_sni_check: {{ adguard_tls_sni_check | default(false) | lower | string }}
-querylog:
-  enabled: {{ adguard_querylog_enabled | default(true) | lower | string }}
-  file_enabled: true
-  interval: {{ adguard_querylog_interval | default('2160h') }}
-  size_memory: 1000
-  ignored: []
-statistics:
-  enabled: true
-  interval: {{ adguard_statistics_interval }}
-  ignored: []
+  use_private_ptr_resolvers: {{ adguard_ptr_enabled | default(false) | lower | string }}
 {% if adguard_filters | length > 0 %}
 filters:
 {% for filter in adguard_filters %}
@@ -142,6 +136,59 @@ filters:
 {% endfor %}{% else %}
 filters: []
 {% endif %}
+http_proxy: ""
+language: ""
+log_compress: false
+log_file: ""
+log_localtime: false
+log_max_age: 3
+log_max_backups: 0
+log_max_size: 100
+os:
+  group: ""
+  user: ""
+  rlimit_nofile: 0
+querylog:
+  enabled: {{ adguard_querylog_enabled | default(true) | lower | string }}
+  file_enabled: true
+  interval: {{ adguard_querylog_interval | default('2160h') }}
+  size_memory: 1000
+  ignored: []
+schema_version: 17
+statistics:
+  enabled: true
+  interval: {{ adguard_statistics_interval }}
+  ignored: []
+theme: auto
+tls:
+  allow_unencrypted_doh: false
+  certificate_chain: {{ (adguard_tls_certificate | from_yaml) if (adguard_tls_certificate | length > 0) else '""' }}
+{% if adguard_tls_certificate_path | length > 0 %}
+  certificate_path: {{ '""' if (adguard_tls_certificate | length > 0) else adguard_tls_certificate_path }}
+{% else %}
+  certificate_path: ""
+{% endif %}
+  dnscrypt_config_file: ""
+  enabled: {{ (adguard_tls or adguard_https) | default(false) | lower | string }}
+  force_https: {{ adguard_https | default(false) | lower | string }}
+  port_dns_over_quic: 784
+  port_dns_over_tls: 853
+  port_dnscrypt: {{ 5443 if adguard_dnscrypt else 0 }}
+  port_https: 443
+  private_key: {{ (adguard_tls_key | from_yaml) if (adguard_tls_key | length > 0) else '""' }}
+{% if adguard_tls_key_path | length > 0 %}
+  private_key_path: {{ '""' if (adguard_tls_key | length > 0) else adguard_tls_key_path }}
+{% else %}
+  private_key_path: ""
+{% endif %}
+  server_name: {{ adguard_url }}
+  strict_sni_check: {{ adguard_tls_sni_check | default(false) | lower | string }}
+user_rules: []
+users:
+  - name: {{ adguard_user }}
+    password: {{ adguard_password | password_hash('bcrypt', adguard_salt) }}
+verbose: {{ adguard_verbose | default(false) | lower | string }}
+web_session_ttl: 720
 {% if adguard_whitelist | length > 0 %}
 whitelist_filters:
 {% for filter in adguard_whitelist %}
@@ -152,41 +199,3 @@ whitelist_filters:
 {% endfor %}{% else %}
 whitelist_filters: []
 {% endif %}
-user_rules: []
-dhcp:
-  enabled: {{ adguard_dhcp | default(false) | lower | string }}
-  interface_name: "{{ adguard_dhcp_interface }}"
-  local_domain_name: lan
-  dhcpv4:
-    gateway_ip: "{{ adguard_dhcp4.gateway_ip }}"
-    subnet_mask: "{{ adguard_dhcp4.subnet_mask }}"
-    range_start: "{{ adguard_dhcp4.range_start }}"
-    range_end: "{{ adguard_dhcp4.range_end }}"
-    lease_duration: {{ adguard_dhcp4.lease_duration | default(86400) }}
-    icmp_timeout_msec: {{ adguard_dhcp4.icmp_timeout_msec | default(1000) }}
-    options: {{ adguard_dhcp4.options | from_yaml }}
-  dhcpv6:
-    range_start: "{{ adguard_dhcp6.range_start }}"
-    lease_duration: {{ adguard_dhcp6.lease_duration | default(86400) }}
-    ra_slaac_only: {{ adguard_dhcp4.ra_slaac_only | default(false) | lower | string }}
-    ra_allow_slaac: {{ adguard_dhcp4.ra_allow_slaac | default(false) | lower | string }}
-clients:
-  runtime_sources:
-    whois: {{ adguard_client_resolve | default(true) | lower | string }}
-    arp: {{ adguard_client_resolve | default(true) | lower | string }}
-    rdns: {{ adguard_client_resolve | default(true) | lower | string }}
-    dhcp: {{ adguard_client_resolve | default(true) | lower | string }}
-    hosts: {{ adguard_client_resolve | default(true) | lower | string }}
-  persistent: []
-log_file: ""
-log_max_backups: 0
-log_max_size: 100
-log_max_age: 3
-log_compress: false
-log_localtime: false
-verbose: {{ adguard_verbose | default(false) | lower | string }}
-os:
-  group: ""
-  user: ""
-  rlimit_nofile: 0
-schema_version: 17
