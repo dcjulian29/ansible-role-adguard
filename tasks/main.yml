@@ -5,7 +5,7 @@
     state: directory
     owner: root
     group: docker
-    mode: 0644
+    mode: "0644"
   with_items:
     - "{{ adguard_data_dir }}/{{ adguard_name }}"
     - "{{ adguard_data_dir }}/{{ adguard_name }}/work"
@@ -27,7 +27,7 @@
     dest: "{{ adguard_data_dir }}/{{ adguard_name }}/conf/AdGuardHome.yaml"
     owner: root
     group: docker
-    mode: 0644
+    mode: "0644"
   tags:
     - configure
   notify: Restart Adguard
