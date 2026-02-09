@@ -27,7 +27,7 @@ adguard_dhcp4:
   gateway_ip: ""
   icmp_timeout_msec: 1000
   lease_duration: 86400
-  options: []
+  options: "[]"
   range_end: ""
   range_start: ""
   subnet_mask: ""
@@ -37,7 +37,6 @@ adguard_dhcp6:
   ra_allow_slaac: false
   range_start: ""
 adguard_dhcp_interface: ""
-adguard_dns: true
 adguard_dns_bootstrap:
   - 8.8.8.8
   - 9.9.9.9
@@ -63,15 +62,12 @@ adguard_filters:
     id: 3
     name: OISD
     url: https://abp.oisd.nl/
-adguard_host_resolve_disable: true
 adguard_https: false
 adguard_image: adguard/adguardhome
 adguard_letsencrypt: false
-adguard_name: "adguard_{{ ansible_hostname }}"
+adguard_name: "adguard_{{ ansible_facts['hostname'] }}"
 adguard_parental: false
 adguard_password: Change2Me!
-adguard_ports:
-  - "80:80/tcp"
 adguard_ports_dhcp:
   - "67:67/udp"
   - "68:68/tcp"
@@ -82,6 +78,8 @@ adguard_ports_dns:
 adguard_ports_dnscrypt:
   - "5443:5443/tcp"
   - "5443:5443/udp"
+adguard_ports_http:
+  - "80:80/tcp"
 adguard_ports_https:
   - "443:443/tcp"
   - "443:443/udp"
@@ -106,7 +104,7 @@ adguard_safe_search_google: true
 adguard_safe_search_pixabay: true
 adguard_safe_search_yandex: true
 adguard_safe_search_youtube: true
-adguard_salt: "{{ ansible_machine_id[0:21] + '.' }}"
+adguard_salt: "{{ ansible_facts['machine_id'][0:21] + '.' }}"
 adguard_statistics_interval: 1
 adguard_tls: false
 adguard_tls_certificate: ""
@@ -114,7 +112,7 @@ adguard_tls_certificate_path: ""
 adguard_tls_key: ""
 adguard_tls_key_path: ""
 adguard_tls_sni_check: false
-adguard_url: "{{ ansible_fqdn }}"
+adguard_url: "{{ ansible_facts['fqdn'] }}"
 adguard_user: admin
 adguard_verbose: false
 adguard_version: v0.107.71

@@ -45,58 +45,57 @@
   failed_when: >-
     results is failed and
     "Could not find the requested service" not in results.msg | default('')
-  when:
-    - adguard_dns
-    - adguard_host_resolve_disable
 
-- name: Determine if HTTP port is not needed for container
+- name: Expose DNS ports to container
   ansible.builtin.set_fact:
-    adguard_ports: []
-  when:
-    - adguard_tls or adguard_https
-    - adguard_letsencrypt | default(false)
+    adguard_ports: "{{ adguard_ports_dns }}"
 
-- name: Determine if DHCP ports are needed for container
+- name: Exose DHCP ports to container
   ansible.builtin.set_fact:
     adguard_ports: "{{ adguard_ports + adguard_ports_dhcp }}"
   when: adguard_dhcp
 
-- name: Determine if DNS ports are needed for container
-  ansible.builtin.set_fact:
-    adguard_ports: "{{ adguard_ports + adguard_ports_dns }}"
-  when: adguard_dns
-
-- name: Determine if DNScrypt ports are needed for container
+- name: Expose DNScrypt ports to container
   ansible.builtin.set_fact:
     adguard_ports: "{{ adguard_ports + adguard_ports_dnscrypt }}"
   when: adguard_dnscrypt
 
-- name: Determine if HTTPS/DNS-HTTPS port is needed for container
+- name: Expose HTTP port to container
+  ansible.builtin.set_fact:
+    adguard_ports: "{{ adguard_ports + adguard_ports_http }}"
+  when:
+    - not adguard_https
+
+- name: Expose HTTPS/DNS-HTTPS port is needed for container
   ansible.builtin.set_fact:
     adguard_ports: "{{ adguard_ports + adguard_ports_https }}"
   when: adguard_https
 
-- name: Determine if DNS-QUIC ports are needed for container
+- name: Expose DNS-QUIC ports to container
   ansible.builtin.set_fact:
     adguard_ports: "{{ adguard_ports + adguard_ports_quic }}"
   when: adguard_quic
 
-- name: Determine if DNS-TLS ports are needed for container
+- name: Expose DNS-TLS ports to container
   ansible.builtin.set_fact:
     adguard_ports: "{{ adguard_ports + adguard_ports_tls }}"
   when: adguard_tls
+
+- name: Ports that will be exposed
+  ansible.builtin.debug:
+    var: adguard_ports
 
 - name: Ensure Adguard container is created
   community.docker.docker_container:
     container_default_behavior: no_defaults
     detach: true
     env:
-      TZ: "{{ ansible_date_time.tz }}"
+      TZ: "{{ ansible_facts['date_time'].tz }}"
     image: "{{ adguard_image }}:{{ adguard_version }}"
     interactive: false
     name: "{{ adguard_name }}"
     network_mode: "{{ 'host' if adguard_dhcp else 'bridge' }}"
-    ports: "{{ '[]' if adguard_dhcp else adguard_ports }}"
+    ports: "{{ adguard_ports }}"
     pull: false
     restart_policy: always
     state: started
