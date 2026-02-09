@@ -117,7 +117,7 @@ adguard_tls_sni_check: false
 adguard_url: "{{ ansible_fqdn }}"
 adguard_user: admin
 adguard_verbose: false
-adguard_version: v0.107.32
+adguard_version: v0.107.71
 adguard_volumes:
   - "{{ adguard_data_dir }}/{{ adguard_name }}/work:/opt/adguardhome/work"
   - "{{ adguard_data_dir }}/{{ adguard_name }}/conf:/opt/adguardhome/conf"
